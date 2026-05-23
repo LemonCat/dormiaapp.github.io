@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dormio — Visualiseur thérapeute</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Be+Vietnam+Pro&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:              #141318;
+      --surface-low:     #101126;
+      --surface:         #16172f;
+      --surface-high:    #1c1d36;
+      --surface-highest: #232440;
+      --on-surface:      #e6e1e9;
+      --on-surface-var:  #c9c4d3;
+      --primary:         #ccc1ff;
+      --primary-dim:     #7757fa;
+      --secondary:       #44f5bb;
+      --tertiary:        #ffe3a0;
+      --error:           #ffb4ab;
+      --outline-var:     #46465b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--on-surface);
+      font-family: 'Be Vietnam Pro', sans-serif;
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ──────────────────────────────────────────────────────── */
+    .app-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .app-header h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ccc1ff, #7757fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+
+    .app-header p {
+      color: var(--on-surface-var);
+      margin-top: 0.5rem;
+      font-size: 1rem;
+    }
+
+    /* ── Drop zone ───────────────────────────────────────────────────── */
+    #drop-section {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .drop-zone {
+      background: var(--surface-high);
+      border: 2px dashed rgba(70, 70, 91, 0.4);
+      border-radius: 2rem;
+      padding: 4rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .drop-zone.drag-over {
+      background: var(--surface-highest);
+      border-color: rgba(204, 193, 255, 0.4);
+    }
+
+    .drop-icon {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .drop-zone h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--on-surface);
+      margin-bottom: 0.5rem;
+    }
+
+    .drop-zone .hint {
+      color: var(--on-surface-var);
+      font-size: 0.9rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      background: linear-gradient(135deg, #ccc1ff, #7757fa);
+      color: #321f77;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #2d008e;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .btn-primary:hover  { transform: translateY(-1px); box-shadow: 0 5px 0 #2d008e; }
+    .btn-primary:active { transform: translateY(2px);  box-shadow: 0 2px 0 #2d008e; }
+
+    .error-msg {
+      color: var(--error);
+      background: rgba(255, 180, 171, 0.08);
+      border-radius: 1rem;
+      padding: 1rem 1.5rem;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    /* ── Content ─────────────────────────────────────────────────────── */
+    #content { display: none; }
+
+    .reload-bar {
+      text-align: right;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-outline {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid rgba(70, 70, 91, 0.4);
+      color: var(--on-surface-var);
+      border-radius: 9999px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      background: transparent;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-outline:hover {
+      border-color: rgba(204, 193, 255, 0.4);
+      color: var(--primary);
+    }
+
+    /* ── Stats bar ───────────────────────────────────────────────────── */
+    .stats-bar {
+      background: var(--surface-high);
+      border-radius: 1.5rem;
+      padding: 1.5rem 2rem;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      text-align: center;
+      align-items: center;
+    }
+
+    .stat-value {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.1;
+    }
+
+    #stat-period.stat-value { font-size: 1.1rem; }
+    .stat-value.num          { font-size: 2rem; }
+
+    .stat-label {
+      color: var(--on-surface-var);
+      font-size: 0.8rem;
+      margin-top: 0.3rem;
+    }
+
+    /* ── Charts ──────────────────────────────────────────────────────── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .chart-card {
+      background: var(--surface-high);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+    }
+
+    .chart-card h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .no-chart-msg {
+      color: var(--on-surface-var);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 2rem;
+      background: var(--surface-high);
+      border-radius: 1.5rem;
+      grid-column: 1 / -1;
+    }
+
+    /* ── Table ───────────────────────────────────────────────────────── */
+    .table-wrap {
+      background: var(--surface-low);
+      border-radius: 1.5rem;
+      overflow: hidden;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    thead th {
+      background: var(--surface-highest);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      color: var(--primary);
+      padding: 0.875rem 1rem;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    tbody tr:nth-child(odd)  { background: var(--surface-low); }
+    tbody tr:nth-child(even) { background: var(--surface); }
+    tbody tr:hover td        { background: var(--surface-high); }
+
+    tbody td {
+      padding: 0.75rem 1rem;
+      color: var(--on-surface);
+      white-space: nowrap;
+    }
+
+    .se-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-weight: 500;
+    }
+
+    .notes-cell {
+      color: var(--on-surface-var);
+      white-space: normal;
+      max-width: 180px;
+      font-size: 0.8rem;
+    }
+
+    /* ── RTL section ─────────────────────────────────────────────────── */
+    .section-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin: 2rem 0 1rem;
+    }
+
+    .rtl-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-weight: 500;
+      font-size: 0.8rem;
+    }
+
+    /* ── Responsive ──────────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .stats-bar { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .charts-grid { grid-template-columns: 1fr; }
+      .app-header h1 { font-size: 1.75rem; }
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 1rem; }
+      .stats-bar { grid-template-columns: 1fr 1fr; padding: 1rem; gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="app-header">
+      <h1>Dormio</h1>
+      <p>Visualiseur agenda du sommeil &mdash; Outil thérapeute</p>
+    </header>
+
+    <!-- ── Drop section ───────────────────────────────────────────── -->
+    <section id="drop-section">
+      <div class="drop-zone" id="drop-zone">
+        <span class="drop-icon">🌙</span>
+        <h2>Charger un export patient</h2>
+        <p class="hint">Déposez le fichier CSV ici ou cliquez sur le bouton</p>
+        <button class="btn-primary" id="browse-btn">Parcourir&hellip;</button>
+        <input type="file" id="file-input" accept=".csv,text/csv" style="display:none">
+      </div>
+      <div class="error-msg" id="error-msg"></div>
+    </section>
+
+    <!-- ── Main content ────────────────────────────────────────────── -->
+    <section id="content">
+      <div class="reload-bar">
+        <button class="btn-outline" id="reload-btn">← Charger un autre fichier</button>
+      </div>
+
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-value" id="stat-period">—</div>
+          <div class="stat-label">Période</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value num" id="stat-entries">—</div>
+          <div class="stat-label">Nuits enregistrées</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value num" id="stat-se">—</div>
+          <div class="stat-label">SE % moyen</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value num" id="stat-tst">—</div>
+          <div class="stat-label">TST moyen</div>
+        </div>
+      </div>
+
+      <div class="charts-grid" id="charts-grid">
+        <div class="chart-card">
+          <h3>Efficacité du sommeil (SE %)</h3>
+          <canvas id="chart-se"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Temps de sommeil total (TST)</h3>
+          <canvas id="chart-tst"></canvas>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Coucher</th>
+              <th>Lever</th>
+              <th>Latence (min)</th>
+              <th>Réveils</th>
+              <th>Éveil (min)</th>
+              <th>Qualité</th>
+              <th>TST (h)</th>
+              <th>SE %</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+
+      <div id="rtl-section" style="display:none">
+        <h2 class="section-title">Évolution de la fenêtre RTL</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Semaine</th>
+                <th>Coucher prescrit</th>
+                <th>Réveil prescrit</th>
+                <th>Durée (min)</th>
+                <th>Durée</th>
+                <th>Enregistrée le</th>
+              </tr>
+            </thead>
+            <tbody id="rtl-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div><!-- .container -->
+
+  <script>
+    'use strict';
+
+    // ── DOM refs ────────────────────────────────────────────────────────
+    const dropZone   = document.getElementById('drop-zone');
+    const fileInput  = document.getElementById('file-input');
+    const errorMsg   = document.getElementById('error-msg');
+    const dropSection = document.getElementById('drop-section');
+    const content    = document.getElementById('content');
+
+    let _charts = [];
+
+    // ── Drag & drop ─────────────────────────────────────────────────────
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropZone.classList.add('drag-over');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) readFile(file);
+    });
+
+    document.getElementById('browse-btn').addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', e => {
+      if (e.target.files[0]) readFile(e.target.files[0]);
+    });
+
+    document.getElementById('reload-btn').addEventListener('click', () => {
+      _charts.forEach(c => c.destroy());
+      _charts = [];
+      content.style.display = 'none';
+      dropSection.style.display = 'block';
+      errorMsg.style.display = 'none';
+      fileInput.value = '';
+      document.getElementById('rtl-section').style.display = 'none';
+      document.getElementById('rtl-table-body').innerHTML = '';
+      // restore initial charts grid
+      document.getElementById('charts-grid').innerHTML = `
+        <div class="chart-card"><h3>Efficacité du sommeil (SE %)</h3><canvas id="chart-se"></canvas></div>
+        <div class="chart-card"><h3>Temps de sommeil total (TST)</h3><canvas id="chart-tst"></canvas></div>`;
+    });
+
+    // ── File reader ──────────────────────────────────────────────────────
+    function readFile(file) {
+      const reader = new FileReader();
+      reader.onload = e => processText(e.target.result);
+      reader.onerror = () => showError('Impossible de lire le fichier.');
+      reader.readAsText(file, 'UTF-8');
+    }
+
+    // ── CSV parser ───────────────────────────────────────────────────────
+    function parseCsvLine(line) {
+      const fields = [];
+      let field = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c === '"') {
+          if (inQuotes && line[i + 1] === '"') { field += '"'; i++; }
+          else inQuotes = !inQuotes;
+        } else if (c === ';' && !inQuotes) {
+          fields.push(field); field = '';
+        } else {
+          field += c;
+        }
+      }
+      fields.push(field);
+      return fields;
+    }
+
+    function processText(text) {
+      // strip BOM (UTF-8 with BOM from app export)
+      text = text.replace(/^﻿/, '');
+
+      // Split agenda lines from RTL section
+      const allLines = text.split(/\r?\n/).map(l => l.trim());
+      const rtlSepIdx = allLines.findIndex(l => l === '# Fenêtres RTL');
+      const agendaLines = (rtlSepIdx === -1 ? allLines : allLines.slice(0, rtlSepIdx)).filter(l => l);
+      const rtlLines    = rtlSepIdx === -1 ? [] : allLines.slice(rtlSepIdx + 1).filter(l => l);
+
+      if (agendaLines.length < 2) {
+        showError('Le fichier semble vide ou ne contient pas de données.');
+        return;
+      }
+
+      const headerFields = parseCsvLine(agendaLines[0]);
+      if (!headerFields.some(h => h.startsWith('Date')) ||
+          !headerFields.some(h => h.includes('SE') || h.includes('se_pct'))) {
+        showError("Format non reconnu. Exportez le fichier depuis l'application Dormio (Agenda → Exporter mes données).");
+        return;
+      }
+
+      const rows = [];
+      for (let i = 1; i < agendaLines.length; i++) {
+        const f = parseCsvLine(agendaLines[i]);
+        if (f.length < 9) continue;
+        const row = {
+          date:    f[0],
+          coucher: f[1],
+          lever:   f[2],
+          latence: parseInt(f[3])   || 0,
+          reveils: parseInt(f[4])   || 0,
+          eveil:   parseInt(f[5])   || 0,
+          qualite: parseInt(f[6])   || 0,
+          tst_h:   parseFloat(f[7]) || 0,
+          se_pct:  parseFloat(f[8]) || 0,
+          notes:   f[9] || ''
+        };
+        if (row.date && row.date.match(/^\d{4}-\d{2}-\d{2}$/)) rows.push(row);
+      }
+
+      if (rows.length === 0) {
+        showError('Aucune entrée valide trouvée dans le fichier.');
+        return;
+      }
+
+      rows.sort((a, b) => a.date.localeCompare(b.date));
+
+      renderStats(rows);
+      renderCharts(rows);
+      renderTable(rows);
+      renderRtlTable(rtlLines);
+
+      dropSection.style.display = 'none';
+      content.style.display = 'block';
+    }
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.style.display = 'block';
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────
+    function formatDate(d) {
+      if (!d) return '';
+      const [y, m, day] = d.split('-');
+      return `${day}/${m}/${y ? y.slice(2) : ''}`;
+    }
+
+    function seColor(val) {
+      if (val < 85) return { text: '#ffb4ab', bg: 'rgba(255,180,171,0.12)' };
+      if (val < 90) return { text: '#ffe3a0', bg: 'rgba(255,227,160,0.12)' };
+      return { text: '#44f5bb', bg: 'rgba(68,245,187,0.12)' };
+    }
+
+    function escapeHtml(s) {
+      return (s || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    // ── Stats bar ────────────────────────────────────────────────────────
+    function renderStats(rows) {
+      const avgSe  = rows.reduce((s, r) => s + r.se_pct, 0) / rows.length;
+      const avgTst = rows.reduce((s, r) => s + r.tst_h,  0) / rows.length;
+      const tstH   = Math.floor(avgTst);
+      const tstMin = Math.round((avgTst - tstH) * 60);
+
+      const periodEl = document.getElementById('stat-period');
+      if (rows.length === 1) {
+        periodEl.textContent = formatDate(rows[0].date);
+      } else {
+        periodEl.textContent = `${formatDate(rows[0].date)} – ${formatDate(rows[rows.length - 1].date)}`;
+      }
+
+      document.getElementById('stat-entries').textContent = rows.length;
+
+      const seEl = document.getElementById('stat-se');
+      seEl.textContent = `${avgSe.toFixed(1)} %`;
+      seEl.style.color = seColor(avgSe).text;
+
+      document.getElementById('stat-tst').textContent =
+        `${tstH}h${tstMin.toString().padStart(2, '0')}`;
+    }
+
+    // ── Charts ────────────────────────────────────────────────────────────
+    function renderCharts(rows) {
+      _charts.forEach(c => c.destroy());
+      _charts = [];
+
+      const grid = document.getElementById('charts-grid');
+
+      if (rows.length < 3) {
+        grid.innerHTML = '<p class="no-chart-msg">Pas assez de données pour afficher les graphiques (minimum 3 nuits enregistrées).</p>';
+        return;
+      }
+
+      // ensure canvas elements exist (may have been cleared on reload)
+      if (!document.getElementById('chart-se')) {
+        grid.innerHTML = `
+          <div class="chart-card"><h3>Efficacité du sommeil (SE %)</h3><canvas id="chart-se"></canvas></div>
+          <div class="chart-card"><h3>Temps de sommeil total (TST)</h3><canvas id="chart-tst"></canvas></div>`;
+      }
+
+      Chart.defaults.color       = '#c9c4d3';
+      Chart.defaults.borderColor = 'rgba(70,70,91,0.3)';
+      Chart.defaults.font        = { family: "'Be Vietnam Pro', sans-serif", size: 11 };
+
+      const labels = rows.map(r => formatDate(r.date));
+
+      // ── SE% chart ──
+      _charts.push(new Chart(document.getElementById('chart-se'), {
+        data: {
+          labels,
+          datasets: [
+            {
+              type: 'line',
+              label: 'SE %',
+              data: rows.map(r => r.se_pct),
+              borderColor: '#ccc1ff',
+              backgroundColor: 'rgba(204,193,255,0.08)',
+              borderWidth: 2,
+              pointBackgroundColor: '#7757fa',
+              pointRadius: 4,
+              fill: true,
+              tension: 0.3,
+              order: 1
+            },
+            {
+              type: 'line',
+              label: 'Seuil 85 %',
+              data: rows.map(() => 85),
+              borderColor: 'rgba(255,180,171,0.5)',
+              borderWidth: 1.5,
+              borderDash: [5, 5],
+              pointRadius: 0,
+              fill: false,
+              order: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              min: 0,
+              suggestedMax: 100,
+              grid: { color: 'rgba(70,70,91,0.3)' },
+              ticks: { callback: v => v + ' %' }
+            },
+            x: {
+              grid: { color: 'rgba(70,70,91,0.2)' },
+              ticks: { maxRotation: 45, maxTicksLimit: 12 }
+            }
+          },
+          plugins: {
+            legend: { labels: { color: '#c9c4d3' } },
+            tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y.toFixed(1)} %` } }
+          }
+        }
+      }));
+
+      // ── TST chart ──
+      const ctx2 = document.getElementById('chart-tst').getContext('2d');
+      const grad = ctx2.createLinearGradient(0, 0, 0, 260);
+      grad.addColorStop(0, '#44f5bb');
+      grad.addColorStop(1, '#3defb6');
+
+      _charts.push(new Chart(ctx2, {
+        data: {
+          labels,
+          datasets: [
+            {
+              type: 'bar',
+              label: 'TST (h)',
+              data: rows.map(r => r.tst_h),
+              backgroundColor: grad,
+              borderRadius: 4,
+              order: 1
+            },
+            {
+              type: 'line',
+              label: '7h recommandées',
+              data: rows.map(() => 7),
+              borderColor: 'rgba(68,245,187,0.4)',
+              borderWidth: 1.5,
+              borderDash: [5, 5],
+              pointRadius: 0,
+              fill: false,
+              order: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              min: 0,
+              suggestedMax: 10,
+              grid: { color: 'rgba(70,70,91,0.3)' },
+              ticks: { callback: v => v + 'h' }
+            },
+            x: {
+              grid: { color: 'rgba(70,70,91,0.2)' },
+              ticks: { maxRotation: 45, maxTicksLimit: 12 }
+            }
+          },
+          plugins: {
+            legend: { labels: { color: '#c9c4d3' } },
+            tooltip: {
+              callbacks: {
+                label: ctx => {
+                  const h = Math.floor(ctx.parsed.y);
+                  const m = Math.round((ctx.parsed.y - h) * 60);
+                  return ` ${h}h${m.toString().padStart(2, '0')}`;
+                }
+              }
+            }
+          }
+        }
+      }));
+    }
+
+    // ── RTL table ─────────────────────────────────────────────────────────
+    function rtlDurationColor(min) {
+      if (min <= 300) return { text: '#ffb4ab', bg: 'rgba(255,180,171,0.12)' };
+      if (min < 330)  return { text: '#ffe3a0', bg: 'rgba(255,227,160,0.12)' };
+      return { text: '#44f5bb', bg: 'rgba(68,245,187,0.12)' };
+    }
+
+    function formatDuration(min) {
+      const h = Math.floor(min / 60);
+      const m = min % 60;
+      return m === 0 ? `${h}h` : `${h}h${m.toString().padStart(2, '0')}`;
+    }
+
+    function formatIso(s) {
+      if (!s) return '';
+      const d = new Date(s);
+      if (isNaN(d)) return s;
+      return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    }
+
+    function renderRtlTable(rtlLines) {
+      const section = document.getElementById('rtl-section');
+      const tbody   = document.getElementById('rtl-table-body');
+      tbody.innerHTML = '';
+
+      // skip the column header line if present
+      const dataLines = rtlLines.filter(l => !l.startsWith('Semaine;') && l.includes(';'));
+      if (dataLines.length === 0) { section.style.display = 'none'; return; }
+
+      dataLines.forEach(line => {
+        const f = line.split(';');
+        if (f.length < 4) return;
+        const week    = f[0];
+        const coucher = f[1];
+        const reveil  = f[2];
+        const dureeMin = parseInt(f[3]) || 0;
+        const savedAt  = f[4] || '';
+        const c = rtlDurationColor(dureeMin);
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          `<td>${escapeHtml(week)}</td>` +
+          `<td>${escapeHtml(coucher)}</td>` +
+          `<td>${escapeHtml(reveil)}</td>` +
+          `<td>${dureeMin}</td>` +
+          `<td><span class="rtl-badge" style="color:${c.text};background:${c.bg}">${formatDuration(dureeMin)}</span></td>` +
+          `<td>${escapeHtml(formatIso(savedAt))}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      section.style.display = dataLines.length > 0 ? 'block' : 'none';
+    }
+
+    // ── Table ─────────────────────────────────────────────────────────────
+    function renderTable(rows) {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+      rows.forEach(r => {
+        const c  = seColor(r.se_pct);
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          `<td>${escapeHtml(formatDate(r.date))}</td>` +
+          `<td>${escapeHtml(r.coucher)}</td>` +
+          `<td>${escapeHtml(r.lever)}</td>` +
+          `<td>${r.latence}</td>` +
+          `<td>${r.reveils}</td>` +
+          `<td>${r.eveil}</td>` +
+          `<td>${r.qualite}/5</td>` +
+          `<td>${r.tst_h.toFixed(2)}</td>` +
+          `<td><span class="se-badge" style="color:${c.text};background:${c.bg}">${r.se_pct.toFixed(1)} %</span></td>` +
+          `<td class="notes-cell">${escapeHtml(r.notes)}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+  </script>
+</body>
+</html>
