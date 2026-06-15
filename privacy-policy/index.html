@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dormia — Politique de confidentialité</title>
+  <title>Dormia - Politique de confidentialité</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Be+Vietnam+Pro&display=swap" rel="stylesheet">
@@ -65,6 +65,15 @@
       margin-bottom: 12px;
     }
 
+    ul {
+      margin: 8px 0 12px 20px;
+      color: var(--on-surface);
+    }
+
+    ul li {
+      margin-bottom: 6px;
+    }
+
     .highlight {
       background: var(--surface);
       border-left: 3px solid var(--primary);
@@ -99,40 +108,64 @@
 
     <header>
       <h1>Politique de confidentialité</h1>
-      <p>Application Dormia &mdash; Derniere mise a jour : 19 mai 2026</p>
+      <p>Application Dormia &mdash; Dernière mise à jour : 19 mai 2026</p>
     </header>
 
     <div class="highlight">
-      <p><strong>Résumé :</strong> Dormia ne collecte aucune donnée personnelle. Toutes vos informations restent sur votre appareil et ne sont jamais transmises à un serveur ou à un tiers.</p>
+      <p><strong>Résumé :</strong> Dormia ne collecte aucune donnée personnelle. Toutes vos informations restent sur votre appareil et ne sont jamais transmises à un serveur ou à un tiers. Dormia est un outil d'auto-accompagnement et ne constitue pas un dispositif médical.</p>
     </div>
 
     <h2>1. Qui sommes-nous</h2>
-    <p>Dormia est une application mobile d'aide au sommeil basée sur la Thérapie Cognitive et Comportementale de l'Insomnie (TCC-I), développée par Anthony Duc. Pour toute question : <a href="mailto:dormiaapp@gmail.com">dormiaapp@gmail.com</a>.</p>
+    <p>Dormia est une application mobile d'auto-accompagnement au sommeil, développée par Anthony Duc en tant qu'éditeur indépendant. L'application s'inspire des techniques de la Thérapie Cognitive et Comportementale appliquée au sommeil, sans constituer une mise en œuvre médicale ni une prestation thérapeutique.</p>
+    <p>Pour toute question relative à la présente politique : <a href="mailto:dormiaapp@gmail.com">dormiaapp@gmail.com</a></p>
 
-    <h2>2. Données collectées</h2>
+    <h2>2. Nature de l'application</h2>
+    <p>Dormia est un outil d'auto-accompagnement destiné à un usage personnel par un public adulte. <strong>L'application ne constitue pas un dispositif médical</strong> au sens du règlement (UE) 2017/745. Elle n'a pas vocation à diagnostiquer, traiter, prévenir, atténuer ou guérir une maladie ou un trouble de santé.</p>
+    <p>Dormia ne se substitue pas à un avis médical, à un diagnostic, à une prescription, ou à un suivi par un professionnel de santé. En cas de difficulté de sommeil persistante ou d'inquiétude sur votre état de santé, consultez un professionnel.</p>
+
+    <h2>3. Données collectées</h2>
     <p>Dormia ne collecte aucune donnée personnelle identifiable. L'application ne nécessite aucune création de compte et ne communique avec aucun serveur distant.</p>
-    <p>Les seules données produites par l'application (journal du sommeil, progression dans le programme, réglages) sont stockées localement sur votre appareil dans une base de données SQLite privée, inaccessible aux autres applications.</p>
+    <p>Les seules informations produites par l'application sont saisies par vous-même (journal du sommeil, suivi de votre parcours, réglages personnels) et sont stockées localement sur votre appareil, dans une base de données SQLite privée inaccessible aux autres applications.</p>
+    <p>Certaines de ces informations relèvent par leur nature de <strong>données de santé au sens de l'article 9 du RGPD</strong> (données relatives au sommeil et au bien-être). Elles bénéficient à ce titre d'une protection renforcée. Dormia ne transmet aucune de ces données à un tiers, ne les expose à aucun service en ligne, et ne les utilise à aucune fin autre que le fonctionnement local de l'application sur votre appareil.</p>
 
-    <h2>3. Données de santé</h2>
-    <p>Dormia ne lit ni n'écrit aucune donnée dans les systèmes de santé de votre appareil (Apple Health, Google Fit). L'application n'accède pas à votre microphone, accéléromètre, ni à aucun capteur biométrique.</p>
+    <h2>4. Données des plateformes de santé</h2>
+    <p>Dormia ne lit ni n'écrit aucune donnée dans les services de santé de votre appareil (Apple Santé, Google Fit, Samsung Health). L'application n'accède pas à votre microphone, à votre accéléromètre, ni à aucun capteur biométrique de votre appareil.</p>
 
-    <h2>4. Partage des données</h2>
-    <p>Aucune donnée n'est partagée avec des tiers. Dormia ne contient aucun SDK publicitaire, outil d'analyse comportementale ou système de tracking.</p>
+    <h2>5. Partage des données</h2>
+    <p>Aucune donnée n'est partagée avec des tiers. Dormia ne contient aucun SDK publicitaire, aucun outil d'analyse comportementale, et aucun système de tracking ou de pistage.</p>
 
-    <h2>5. Notifications</h2>
-    <p>Si vous activez les rappels, Dormia programme des notifications locales sur votre appareil. Ces notifications sont générées localement — aucune donnée ne transite par un serveur de notifications tiers.</p>
+    <h2>6. Notifications</h2>
+    <p>Si vous activez les rappels, Dormia programme des notifications <strong>locales</strong> sur votre appareil, via les mécanismes systèmes prévus à cet effet (<code>UNUserNotificationCenter</code> sur iOS, <code>AlarmManager</code> ou <code>WorkManager</code> sur Android). Ces notifications sont déclenchées localement par votre appareil au moment programmé. Aucune donnée ne transite par les services de notifications à distance type APNS ou FCM, et aucun serveur distant n'est sollicité pour leur déclenchement.</p>
 
-    <h2>6. Vos droits (RGPD)</h2>
-    <p>Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit d'accès, de rectification et de suppression de vos données.</p>
-    <p>La base légale du traitement est le consentement : vous choisissez librement d'utiliser l'application et d'y saisir des informations.</p>
-    <p><strong>Pour supprimer toutes vos données :</strong> désinstallez l'application. Cela efface définitivement la base de données locale et toutes les informations associées.</p>
-    <p>Pour toute demande relative à vos données : <a href="mailto:dormiaapp@gmail.com">dormiaapp@gmail.com</a>.</p>
+    <h2>7. Public visé et mineurs</h2>
+    <p>Dormia est destinée à un public adulte (18 ans et plus). L'application n'est pas conçue pour les mineurs et ne doit pas leur être proposée sans accompagnement d'un professionnel de santé qualifié. Aucune donnée n'est sciemment collectée concernant des mineurs.</p>
 
-    <h2>7. Modifications</h2>
-    <p>Cette politique peut être mise à jour en cas d'évolution de l'application. La date de dernière mise à jour est indiquée en haut de cette page. En cas de changement substantiel, une notification sera affichée dans l'application.</p>
+    <h2>8. Vos droits (RGPD)</h2>
+    <p>Dans la mesure où Dormia ne collecte ni ne transmet aucune donnée hors de votre appareil, l'éditeur n'a accès à aucune information vous concernant et n'exerce aucun traitement de données personnelles au sens du RGPD.</p>
+    <p>Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez sur vos données personnelles d'un droit d'accès, de rectification, d'effacement, d'opposition, de limitation et de portabilité.</p>
+    <p>Ces droits s'exercent directement sur votre appareil :</p>
+    <ul>
+      <li><strong>Accès et rectification</strong> : consultez et modifiez vos données depuis l'application elle-même.</li>
+      <li><strong>Effacement</strong> : désinstallez l'application. Cette désinstallation supprime définitivement la base de données locale et l'ensemble des informations associées.</li>
+      <li><strong>Portabilité</strong> : la fonction d'export PDF de votre bilan vous permet d'obtenir une copie lisible de votre parcours.</li>
+    </ul>
+    <p>La <strong>base légale</strong> du traitement local est votre consentement explicite (article 6.1.a du RGPD), donné par l'usage volontaire de l'application. Pour les données relevant de la catégorie particulière de l'article 9 RGPD (données de santé), votre consentement explicite couvre également les exigences de l'article 9.2.a.</p>
+    <p>Pour toute demande ou question relative à la présente politique : <a href="mailto:dormiaapp@gmail.com">dormiaapp@gmail.com</a></p>
+
+    <h2>9. Conservation des données</h2>
+    <p>Les données saisies sont conservées localement sur votre appareil tant que l'application est installée. Aucune copie n'est conservée par l'éditeur ou par un tiers, puisqu'aucune transmission n'a lieu. La désinstallation de l'application entraîne la suppression définitive et immédiate de l'ensemble des données associées.</p>
+
+    <h2>10. Sécurité</h2>
+    <p>La base de données locale est stockée dans l'espace privé de l'application sur votre appareil, conformément aux mécanismes de cloisonnement applicatif (sandboxing) prévus par iOS et Android. Cette base n'est pas accessible aux autres applications installées sur l'appareil. Sa sécurité dépend de la sécurité d'ensemble de votre appareil (verrouillage écran, chiffrement du stockage, mises à jour systèmes).</p>
+
+    <h2>11. Modifications de la présente politique</h2>
+    <p>Cette politique peut être mise à jour en cas d'évolution de l'application ou du cadre réglementaire applicable. La date de dernière mise à jour est indiquée en haut de cette page. En cas de changement substantiel, une notification sera affichée dans l'application lors de votre prochaine session.</p>
+
+    <h2>12. Contact</h2>
+    <p>Pour toute question relative à la présente politique de confidentialité ou à vos données : <a href="mailto:dormiaapp@gmail.com">dormiaapp@gmail.com</a></p>
 
     <footer>
-      <p>Dormia &mdash; Application TCC-I pour l'insomnie chronique</p>
+      <p>Dormia &mdash; Outil d'auto-accompagnement au sommeil</p>
     </footer>
 
   </div>
