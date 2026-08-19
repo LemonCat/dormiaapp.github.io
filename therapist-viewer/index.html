@@ -4,11 +4,58 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dormia - Visualiseur thérapeute</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Be+Vietnam+Pro&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+
+  <!--
+    SEC.8 - Cette page affiche les données de sommeil d'un patient. Elle ne charge
+    donc aucune ressource tierce : tout code qui s'exécute ici voit ces données.
+
+    CSP : GitHub Pages ne permet pas d'en-têtes HTTP personnalisés, d'où la balise meta.
+    'unsafe-inline' est nécessaire pour le style et le script inline de cette page
+    (fichier unique, aucun build) ; en contrepartie aucune origine externe n'est
+    autorisée et connect-src 'none' interdit toute requête sortante.
+  -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none';
+                 script-src 'self' 'unsafe-inline';
+                 style-src 'self' 'unsafe-inline';
+                 font-src 'self';
+                 img-src 'self' data:;
+                 connect-src 'none';
+                 object-src 'none';
+                 base-uri 'none';
+                 form-action 'none';
+                 frame-ancestors 'none'">
+
+  <!-- Chart.js 4.5.0 auto-hébergé (MIT). Auparavant chargé depuis jsdelivr en version
+       flottante @4 et sans SRI : une compromission du CDN exécutait du code arbitraire
+       sur les données patient. -->
+  <script src="vendor/chart.umd.min.js"></script>
+
   <style>
+    /* Polices auto-hébergées - remplacent Google Fonts, qui transmettait l'adresse IP
+       du thérapeute à Google à chaque ouverture de la page. */
+    @font-face {
+      font-family: 'Plus Jakarta Sans';
+      src: url('fonts/PlusJakartaSans-SemiBold.ttf') format('truetype');
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Plus Jakarta Sans';
+      src: url('fonts/PlusJakartaSans-Bold.ttf') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Be Vietnam Pro';
+      src: url('fonts/BeVietnamPro-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -543,11 +590,17 @@
       return { text: '#44f5bb', bg: 'rgba(68,245,187,0.12)' };
     }
 
+    // SEC.8 - Les guillemets sont echappes aussi. Aujourd'hui toutes les valeurs issues
+    // du CSV sont interpolees en position textuelle, donc leur absence n'etait pas
+    // exploitable ; mais la premiere interpolation en position d'attribut aurait
+    // transforme ce raccourci en XSS stockee.
     function escapeHtml(s) {
       return (s || '')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     // ── Stats bar ────────────────────────────────────────────────────────
