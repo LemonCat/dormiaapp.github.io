@@ -407,7 +407,8 @@
             <tr>
               <th>Date</th>
               <th>Coucher</th>
-              <th>Lever</th>
+              <th>Réveil</th>
+              <th>Sortie du lit</th>
               <th>Latence (min)</th>
               <th>Réveils</th>
               <th>Éveil (min)</th>
@@ -551,7 +552,18 @@
           qualite: parseInt(f[6])   || 0,
           tst_h:   parseFloat(f[7]) || 0,
           se_pct:  parseFloat(f[8]) || 0,
-          notes:   f[9] || ''
+          notes:   f[9] || '',
+          // Colonnes du Consensus Sleep Diary ajoutees en fin de ligne (QA.6) :
+          // les exports anterieurs ne les ont pas, d'ou les valeurs de repli.
+          extinction: f[10] || '',
+          sortie_lit: f[11] || '',
+          sieste:     f[12] || '',
+          sieste_h:   f[13] || '',
+          sieste_min: parseInt(f[14]) || 0,
+          cafeines:   parseInt(f[15]) || 0,
+          cafeine_h:  f[16] || '',
+          alcools:    parseInt(f[17]) || 0,
+          alcool_h:   f[18] || ''
         };
         if (row.date && row.date.match(/^\d{4}-\d{2}-\d{2}$/)) rows.push(row);
       }
@@ -828,6 +840,7 @@
           `<td>${escapeHtml(formatDate(r.date))}</td>` +
           `<td>${escapeHtml(r.coucher)}</td>` +
           `<td>${escapeHtml(r.lever)}</td>` +
+          `<td>${escapeHtml(r.sortie_lit || '-')}</td>` +
           `<td>${r.latence}</td>` +
           `<td>${r.reveils}</td>` +
           `<td>${r.eveil}</td>` +
